@@ -5,6 +5,10 @@
 *.so
 *.dylib
 
+src/ts-publishing-api-go/ts-publishing-api-go
+settings.yml
+turbosquid-sample-product
+
 # Test binary, built with `go test -c`
 *.test
 
