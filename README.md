@@ -1,10 +1,10 @@
 # ts-publishing-api-go
-Golang implementation of TurboSquid Publishing API
+Go implementation of TurboSquid Publishing API
 
 # Installation
-You can download a compiled version of the ts-publishing-api-go app for your platform. The unzipped file can be placed anywhere on your computer that you have read/write access.
+You can download a compiled version of the ts-publishing-api-go app for your platform https://github.com/turbosquid/ts-publishing-api-go/releases. The application can be placed anywhere on your computer.
 
-You can also build your own application as long as you have Go version 1.12 or later. Please follow general Go language instructions.
+You can also build your own application as long as you have Go version 1.12 or later. Please follow general Go language instructions for building.
 
 # Usage
 ts-publishing-api-go app is a commandline application. To run it, go to your command prompt or terminal and change the current working directory to the folder that you installed ts-publishing-api-go. Run the following command where "product-folder" is the name of a folder in the current directory that has a product.json definition and files to publish to TurboSquid.
