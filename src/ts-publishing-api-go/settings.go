@@ -2,11 +2,12 @@ package main
 
 import (
 	"bufio"
-	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
 	"os"
 	"strings"
+
+	"gopkg.in/yaml.v2"
 )
 
 type Settings struct {
@@ -44,7 +45,7 @@ func GetSettings() Settings {
 
 	err = yaml.Unmarshal(yamlFile, &s)
 	if err != nil {
-		log.Fatalf("settings.yml is not properly formatted", err)
+		log.Fatalf("settings.yml is not properly formatted: %s", err)
 	}
 	if s.Server == "" {
 		s.Server = "https://api.turbosquid.com"

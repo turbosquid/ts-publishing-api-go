@@ -3,16 +3,17 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"github.com/aws/aws-sdk-go/aws"
-	awscreds "github.com/aws/aws-sdk-go/aws/credentials"
-	awssession "github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3/s3manager"
-	"github.com/google/jsonapi"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/aws/aws-sdk-go/aws"
+	awscreds "github.com/aws/aws-sdk-go/aws/credentials"
+	awssession "github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/google/jsonapi"
 )
 
 type Credentials struct {
@@ -37,20 +38,20 @@ type Upload struct {
 
 func (credentials *Credentials) Upload(directory string, filePath string, settings Settings) (error, int) {
 	if err := credentials.checkExpired(settings); err != nil {
-		log.Fatalf("Failure getting credentials", err)
+		log.Fatalf("Failure getting credentials: %s", err)
 	}
 	log.Printf("Uploading file %s", filePath)
 
 	err, upload := credentials.UploadFile(fmt.Sprintf("%s/%s", directory, filePath))
 	if err != nil {
-		log.Fatalf("Failure uploading file", err)
+		log.Fatalf("Failure uploading file: %s", err)
 	}
 
 	if settings.Debug {
 		log.Printf("Processing file %s", filePath)
 	}
 	if err = processUpload(settings, &upload); err != nil {
-		log.Fatalf("Failure processing upload", err)
+		log.Fatalf("Failure processing upload: %s", err)
 	}
 
 	if settings.Debug {
