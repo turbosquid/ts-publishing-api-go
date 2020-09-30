@@ -3,9 +3,10 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"github.com/google/jsonapi"
 	"log"
 	"net/http"
+
+	"github.com/google/jsonapi"
 )
 
 type Thumbnail struct {
@@ -84,6 +85,15 @@ func (draft *Draft) createDraft(settings Settings) error {
 	}
 
 	defer resp.Body.Close()
+
+	if settings.Debug {
+		buf := new(bytes.Buffer)
+		buf.ReadFrom(resp.Body)
+		bodyStr := buf.String()
+
+		log.Printf(resp.Status)
+		log.Printf(bodyStr)
+	}
 
 	err = jsonapi.UnmarshalPayload(resp.Body, draft)
 	if draft.Id > 0 {
@@ -293,7 +303,7 @@ func (draft *Draft) certifications(settings Settings, certifications []string) e
 
 func (draft *Draft) publish(settings Settings) (error, int) {
 	log.Printf("Publish draft")
-	url := fmt.Sprintf("%s/api/products", settings.Server, draft.Id)
+	url := fmt.Sprintf("%s/api/products", settings.Server)
 
 	var product Product
 	product.Draft = draft

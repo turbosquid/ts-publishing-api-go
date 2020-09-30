@@ -14,6 +14,12 @@ type ProductBundle struct {
 	Certifications []string  `json:"certifications"`
 }
 
+func NewProductBundle() ProductBundle {
+	return ProductBundle{
+		Draft: NewDraft(),
+	}
+}
+
 type Draft struct {
 	Id           int      `jsonapi:"primary,draft,omitempty"`
 	Name         string   `json:"name" jsonapi:"attr,name"`
@@ -35,10 +41,26 @@ type Draft struct {
 	Vertices     int      `json:"vertices" jsonapi:"attr,vertices"`
 }
 
+func NewDraft() Draft {
+	return Draft{
+		Status:  "private",
+		License: "royalty_free_all_extended_uses",
+	}
+}
+
 type Price struct {
 	Value       int    `json:"value"`
 	Currency    string `json:"currency"`
 	Denominator int    `json:"demonminator"`
+}
+
+func buildUsdPrice(usdPrice float32) Price {
+	denominator := 100
+	return Price{
+		Currency:    "USD",
+		Denominator: denominator,
+		Value:       int(usdPrice * float32(denominator)),
+	}
 }
 
 type File struct {
@@ -65,17 +87,15 @@ func ReadInput(directory string) ProductBundle {
 	productPath := fmt.Sprintf("%s/product.json", directory)
 	jsonFile, err := ioutil.ReadFile(productPath)
 	if err != nil {
-		log.Fatalf(fmt.Sprintf("unable to read %s", productPath), err)
+		log.Fatalf("unable to read %s: %s", productPath, err)
 	}
 
-	var pb ProductBundle
-	if err = json.Unmarshal([]byte(jsonFile), &pb); err != nil {
-		log.Fatalf("Unable to parse json file: ", err)
+	var productBundle = NewProductBundle()
+	if err = json.Unmarshal([]byte(jsonFile), &productBundle); err != nil {
+		log.Fatalf("Unable to parse json file: %s", err)
 	}
 
-	pb.Draft.Price.Currency = "USD"
-	pb.Draft.Price.Denominator = 100
-	pb.Draft.Price.Value = int(pb.Draft.PriceUsd * 100.0)
+	productBundle.Draft.Price = buildUsdPrice(productBundle.Draft.PriceUsd)
 
-	return pb
+	return productBundle
 }
