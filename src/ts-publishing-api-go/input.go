@@ -54,7 +54,7 @@ type Price struct {
 	Denominator int    `json:"demonminator"`
 }
 
-func UsdPrice(usdPrice float32) Price {
+func buildUsdPrice(usdPrice float32) Price {
 	denominator := 100
 	return Price{
 		Currency:    "USD",
@@ -95,7 +95,7 @@ func ReadInput(directory string) ProductBundle {
 		log.Fatalf("Unable to parse json file: %s", err)
 	}
 
-	productBundle.Draft.Price = UsdPrice(productBundle.Draft.PriceUsd)
+	productBundle.Draft.Price = buildUsdPrice(productBundle.Draft.PriceUsd)
 
 	return productBundle
 }
