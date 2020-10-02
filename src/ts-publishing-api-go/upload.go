@@ -115,7 +115,7 @@ func (credentials *Credentials) updateCredentials(settings Settings) error {
 	url := fmt.Sprintf("%s/api/uploads/credentials", settings.Server)
 	req, err := http.NewRequest("POST", url, nil)
 	if err != nil {
-		log.Fatal("Error building request for Upload Credentials", err)
+		log.Fatal("Error building request for Upload Credentials: ", err)
 		return err
 	}
 	req.Header.Add("Authorization", fmt.Sprintf("Token %s", settings.Token))
@@ -125,7 +125,7 @@ func (credentials *Credentials) updateCredentials(settings Settings) error {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Fatal("Error performing request for Upload Credentials", err)
+		log.Fatal("Error performing request for Upload Credentials: ", err)
 		return err
 	}
 
@@ -146,13 +146,13 @@ func processUpload(settings Settings, upload *Upload) error {
 	url := fmt.Sprintf("%s/api/uploads", settings.Server)
 	var message bytes.Buffer
 	if err := jsonapi.MarshalPayload(&message, upload); err != nil {
-		log.Fatal("Error building upload process message", err)
+		log.Fatal("Error building upload process message: ", err)
 		return err
 	}
 
 	req, err := http.NewRequest("POST", url, bytes.NewReader(message.Bytes()))
 	if err != nil {
-		log.Fatal("Error building request for Upload Process", err)
+		log.Fatal("Error building request for Upload Process: ", err)
 		return err
 	}
 	req.Header.Add("Authorization", fmt.Sprintf("Token %s", settings.Token))
@@ -162,7 +162,7 @@ func processUpload(settings Settings, upload *Upload) error {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Fatal("Error performing request for Upload Process", err)
+		log.Fatal("Error performing request for Upload Process: ", err)
 		return err
 	}
 
@@ -182,7 +182,7 @@ func (upload *Upload) Poll(settings Settings) error {
 	url := fmt.Sprintf("%s/api/uploads/%s", settings.Server, upload.Id)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		log.Fatal("Error building request for Upload Poll", err)
+		log.Fatal("Error building request for Upload Poll: ", err)
 		return err
 	}
 	req.Header.Add("Authorization", fmt.Sprintf("Token %s", settings.Token))
@@ -192,7 +192,7 @@ func (upload *Upload) Poll(settings Settings) error {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Fatal("Error performing request for Upload Poll", err)
+		log.Fatal("Error performing request for Upload Poll: ", err)
 		return err
 	}
 	defer resp.Body.Close()

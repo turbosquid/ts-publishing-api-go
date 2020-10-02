@@ -273,13 +273,13 @@ func (draft *Draft) certifications(settings Settings, certifications []string) e
 		}
 		var message bytes.Buffer
 		if err := jsonapi.MarshalPayload(&message, certification); err != nil {
-			log.Fatal("Error building certification message", err)
+			log.Fatal("Error building certification message: ", err)
 			return err
 		}
 
 		req, err := http.NewRequest("POST", url, bytes.NewReader(message.Bytes()))
 		if err != nil {
-			log.Fatal("Error building request for certification", err)
+			log.Fatal("Error building request for certification: ", err)
 			return err
 		}
 		req.Header.Add("Authorization", fmt.Sprintf("Token %s", settings.Token))
@@ -289,7 +289,7 @@ func (draft *Draft) certifications(settings Settings, certifications []string) e
 		client := &http.Client{}
 		resp, err := client.Do(req)
 		if err != nil {
-			log.Fatal("Error performing request for Certification", err)
+			log.Fatal("Error performing request for Certification: ", err)
 			return err
 		}
 
@@ -316,7 +316,7 @@ func (draft *Draft) publish(settings Settings) (error, int) {
 
 	req, err := http.NewRequest("POST", url, bytes.NewReader(message.Bytes()))
 	if err != nil {
-		log.Fatal("Error building request for publish", err)
+		log.Fatal("Error building request for publish: ", err)
 		return err, 0
 	}
 	req.Header.Add("Authorization", fmt.Sprintf("Token %s", settings.Token))
@@ -326,7 +326,7 @@ func (draft *Draft) publish(settings Settings) (error, int) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Fatal("Error performing request for Publish", err)
+		log.Fatal("Error performing request for Publish: ", err)
 		return err, 0
 	}
 

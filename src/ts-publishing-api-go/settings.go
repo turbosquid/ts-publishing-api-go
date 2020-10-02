@@ -32,10 +32,10 @@ func GetSettings() Settings {
 			s.Token = text
 			yamlFile, err := yaml.Marshal(s)
 			if err != nil {
-				log.Fatal("Error creating settings yml text", err)
+				log.Fatal("Error creating settings yml text: ", err)
 			}
 			if err = ioutil.WriteFile("settings.yml", yamlFile, 0644); err != nil {
-				log.Fatal("Error writing setting.yml file", err)
+				log.Fatal("Error writing setting.yml file: ", err)
 			}
 			println("API Key saved to settings.yml")
 		} else {
