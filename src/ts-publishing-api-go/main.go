@@ -22,8 +22,8 @@ func main() {
 		os.Exit(0)
 	}
 
-	directory := os.Args[1]
-	productBundle := ReadInput(directory)
+	path := os.Args[1]
+	productBundle := ReadInput(path)
 	var credentials Credentials
 
 	if err := productBundle.Draft.createDraft(settings); err != nil {
@@ -31,7 +31,7 @@ func main() {
 	}
 
 	for _, file := range productBundle.Files {
-		err, fileId := credentials.Upload(directory, file.Name, settings)
+		err, fileId := credentials.Upload(productBundle.Directory, file.Name, settings)
 		if err != nil {
 			log.Fatal("Error uploading file: ", err)
 		}
@@ -42,7 +42,7 @@ func main() {
 
 	for _, preview := range productBundle.Previews {
 		if preview.Type == "thumbnail" {
-			err, fileId := credentials.Upload(directory, preview.Name, settings)
+			err, fileId := credentials.Upload(productBundle.Directory, preview.Name, settings)
 			if err != nil {
 				log.Fatal("Error uploading preview: ", err)
 			}
@@ -50,7 +50,7 @@ func main() {
 
 			productBundle.Draft.addThumbnail(preview, settings)
 		} else if preview.Type == "turntable" {
-			files, err := ioutil.ReadDir(fmt.Sprintf("%s/%s", directory, preview.Name))
+			files, err := ioutil.ReadDir(fmt.Sprintf("%s/%s", productBundle.Directory, preview.Name))
 			if err != nil {
 				log.Fatal("Error reading turntable directory: ", err)
 			}
@@ -59,7 +59,7 @@ func main() {
 				if strings.HasPrefix(file.Name(), ".") {
 					continue
 				}
-				err, fileId := credentials.Upload(directory, fmt.Sprintf("%s/%s", preview.Name, file.Name()), settings)
+				err, fileId := credentials.Upload(productBundle.Directory, fmt.Sprintf("%s/%s", preview.Name, file.Name()), settings)
 				if err != nil {
 					log.Fatal("Error uploading turntable file: ", err)
 				}

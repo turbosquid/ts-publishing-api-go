@@ -5,18 +5,22 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"os"
+	"path/filepath"
 )
 
 type ProductBundle struct {
+	Directory      string
 	Draft          Draft     `json:"product"`
 	Files          []File    `json:"files"`
 	Previews       []Preview `json:"previews"`
 	Certifications []string  `json:"certifications"`
 }
 
-func NewProductBundle() ProductBundle {
+func NewProductBundle(directory string) ProductBundle {
 	return ProductBundle{
-		Draft: NewDraft(),
+		Directory: directory,
+		Draft:     NewDraft(),
 	}
 }
 
@@ -83,14 +87,26 @@ type Preview struct {
 	ThumbnailType string `json:"thumbnail_type"`
 }
 
-func ReadInput(directory string) ProductBundle {
-	productPath := fmt.Sprintf("%s/product.json", directory)
+func ReadInput(path string) ProductBundle {
+	fi, err := os.Stat(path)
+	if err != nil {
+		log.Fatalf("unable to find %s: %s", path, err)
+	}
+
+	productPath := path
+	directory := path
+	if fi.Mode().IsDir() {
+		productPath = fmt.Sprintf("%s/product.json", path)
+	} else {
+		directory = filepath.Dir(path)
+	}
+
 	jsonFile, err := ioutil.ReadFile(productPath)
 	if err != nil {
 		log.Fatalf("unable to read %s: %s", productPath, err)
 	}
 
-	var productBundle = NewProductBundle()
+	var productBundle = NewProductBundle(directory)
 	if err = json.Unmarshal([]byte(jsonFile), &productBundle); err != nil {
 		log.Fatalf("Unable to parse json file: %s", err)
 	}
