@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 
@@ -90,6 +91,7 @@ func (draft *Draft) createDraft(settings Settings) error {
 		buf := new(bytes.Buffer)
 		buf.ReadFrom(resp.Body)
 		bodyStr := buf.String()
+		resp.Body = ioutil.NopCloser(bytes.NewReader([]byte(bodyStr)))
 
 		log.Printf(resp.Status)
 		log.Printf(bodyStr)
@@ -331,6 +333,16 @@ func (draft *Draft) publish(settings Settings) (error, int) {
 	}
 
 	defer resp.Body.Close()
+
+	if settings.Debug {
+		buf := new(bytes.Buffer)
+		buf.ReadFrom(resp.Body)
+		bodyStr := buf.String()
+		resp.Body = ioutil.NopCloser(bytes.NewReader([]byte(bodyStr)))
+
+		log.Printf(resp.Status)
+		log.Printf(bodyStr)
+	}
 
 	if err = jsonapi.UnmarshalPayload(resp.Body, product); err != nil {
 		return err, 0
