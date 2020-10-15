@@ -31,6 +31,7 @@ func main() {
 	}
 
 	for _, file := range productBundle.Files {
+		log.Printf("Uploading file: %s", file.Name)
 		err, fileId := credentials.Upload(productBundle.Directory, file.Name, settings)
 		if err != nil {
 			log.Fatal("Error uploading file: ", err)
@@ -74,10 +75,11 @@ func main() {
 		log.Fatal("Error setting certifications: ", err)
 	}
 
-	err, productId := productBundle.Draft.publish(settings)
-	if err != nil {
-		log.Fatal("Error publishing product: ", err)
+	if productBundle.Publish {
+		err, productId := productBundle.Draft.publish(settings)
+		if err != nil {
+			log.Fatal("Error publishing product: ", err)
+		}
+		log.Printf("Successfully published product ID: %d", productId)
 	}
-
-	log.Printf("Successfully published product ID: %d", productId)
 }
