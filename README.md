@@ -15,6 +15,13 @@ ts-publishing-api-go app is a commandline application. To run it, go to your com
 
 The first time you run this application, it will ask you for your TurboSquid API Key and it will save that information in settings.yml file for future use.
 
+# Publishing
+By default this will build the product draft and not attempt to publish it. If you would like to publish it as a product, add the "-publish" flag to your command.
+
+```bash
+./ts-publishing-api-go -path product-folder -publish
+```
+
 # TurboSquid Sample Product
 We have created a sample product that shows the formatting for product.json that the publishing api app expects. You can download and unzip this sample product into the same directory as the ts-publishing-api-go application.
 
