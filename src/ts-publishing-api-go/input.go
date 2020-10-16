@@ -11,7 +11,6 @@ import (
 
 type ProductBundle struct {
 	Directory      string
-	Publish        bool      `json:"publish"`
 	Draft          Draft     `json:"product"`
 	Files          []File    `json:"files"`
 	Previews       []Preview `json:"previews"`

@@ -1,29 +1,51 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
 const VERSION = "1.2.0"
 
-func main() {
-	settings := GetSettings()
+type Params struct {
+	Path    string
+	Publish bool
+}
 
-	if len(os.Args) != 2 {
-		println("")
-		println("ts-publishing-api-go version", VERSION)
-		println("Please run as 'ts-publishing-api <path to product folder>'")
-		println("See project README.md for more information.")
-		println("")
+func ParseParams() Params {
+	var params Params
+	binName := filepath.Base(os.Args[0])
+	flag.StringVar(&params.Path, "path", "", "Path to product folder")
+	flag.BoolVar(&params.Publish, "publish", false, "Publish draft after creation.")
+	flag.Usage = func() {
+		fmt.Fprintf(flag.CommandLine.Output(), "\n%s %s:\n", binName, VERSION)
+		fmt.Fprintf(flag.CommandLine.Output(), "See project README.md for more information.\n")
+		fmt.Fprintf(flag.CommandLine.Output(), "\nArguments:\n")
+		flag.PrintDefaults()
+		fmt.Fprintf(flag.CommandLine.Output(), "\nExample:\n")
+		fmt.Fprintf(flag.CommandLine.Output(), "\t%s -path <project path>\n", binName)
+	}
+	flag.Parse()
+
+	if params.Path == "" {
+		flag.Usage()
 		os.Exit(0)
 	}
 
-	path := os.Args[1]
-	productBundle := ReadInput(path)
+	return params
+}
+
+func main() {
+	settings := GetSettings()
+
+	params := ParseParams()
+
+	productBundle := ReadInput(params.Path)
 	var credentials Credentials
 
 	if err := productBundle.Draft.createDraft(settings); err != nil {
@@ -75,7 +97,7 @@ func main() {
 		log.Fatal("Error setting certifications: ", err)
 	}
 
-	if productBundle.Publish {
+	if params.Publish {
 		err, productId := productBundle.Draft.publish(settings)
 		if err != nil {
 			log.Fatal("Error publishing product: ", err)
