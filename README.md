@@ -10,7 +10,7 @@ You can also build your own application as long as you have Go version 1.12 or l
 ts-publishing-api-go app is a commandline application. To run it, go to your command prompt or terminal and change the current working directory to the folder that you installed ts-publishing-api-go. Run the following command where "product-folder" is the name of a folder in the current directory that has a product.json definition and files to publish to TurboSquid.
 
 ```bash
-./ts-publishing-api-go product-folder
+./ts-publishing-api-go -path product-folder
 ```
 
 The first time you run this application, it will ask you for your TurboSquid API Key and it will save that information in settings.yml file for future use.
@@ -21,7 +21,7 @@ We have created a sample product that shows the formatting for product.json that
 https://static.turbosquid.com/API/turbosquid-sample-product-1.0.zip
 
 ```bash
-./ts-publishing-api-go turbosquid-sample-product
+./ts-publishing-api-go -path turbosquid-sample-product
 ```
 
 # TurboSquid Account and API Key
