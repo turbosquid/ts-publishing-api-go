@@ -1,29 +1,51 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
-const VERSION = "1.1.0"
+const VERSION = "1.2.0"
+
+type Params struct {
+	Path    string
+	Publish bool
+}
+
+func ParseParams() Params {
+	var params Params
+	binName := filepath.Base(os.Args[0])
+	flag.StringVar(&params.Path, "path", "", "Path to product folder")
+	flag.BoolVar(&params.Publish, "publish", false, "Publish draft after creation.")
+	flag.Usage = func() {
+		fmt.Fprintf(flag.CommandLine.Output(), "\n%s %s:\n", binName, VERSION)
+		fmt.Fprintf(flag.CommandLine.Output(), "See project README.md for more information.\n")
+		fmt.Fprintf(flag.CommandLine.Output(), "\nArguments:\n")
+		flag.PrintDefaults()
+		fmt.Fprintf(flag.CommandLine.Output(), "\nExample:\n")
+		fmt.Fprintf(flag.CommandLine.Output(), "\t%s -path <project path>\n", binName)
+	}
+	flag.Parse()
+
+	if params.Path == "" {
+		flag.Usage()
+		os.Exit(0)
+	}
+
+	return params
+}
 
 func main() {
 	settings := GetSettings()
 
-	if len(os.Args) != 2 {
-		println("")
-		println("ts-publishing-api-go version", VERSION)
-		println("Please run as 'ts-publishing-api <path to product folder>'")
-		println("See project README.md for more information.")
-		println("")
-		os.Exit(0)
-	}
+	params := ParseParams()
 
-	path := os.Args[1]
-	productBundle := ReadInput(path)
+	productBundle := ReadInput(params.Path)
 	var credentials Credentials
 
 	if err := productBundle.Draft.createDraft(settings); err != nil {
@@ -31,6 +53,7 @@ func main() {
 	}
 
 	for _, file := range productBundle.Files {
+		log.Printf("Uploading file: %s", file.Name)
 		err, fileId := credentials.Upload(productBundle.Directory, file.Name, settings)
 		if err != nil {
 			log.Fatal("Error uploading file: ", err)
@@ -74,10 +97,11 @@ func main() {
 		log.Fatal("Error setting certifications: ", err)
 	}
 
-	err, productId := productBundle.Draft.publish(settings)
-	if err != nil {
-		log.Fatal("Error publishing product: ", err)
+	if params.Publish {
+		err, productId := productBundle.Draft.publish(settings)
+		if err != nil {
+			log.Fatal("Error publishing product: ", err)
+		}
+		log.Printf("Successfully published product ID: %d", productId)
 	}
-
-	log.Printf("Successfully published product ID: %d", productId)
 }
