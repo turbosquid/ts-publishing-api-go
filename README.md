@@ -1,6 +1,8 @@
 # ts-publishing-api-go
 Go implementation of TurboSquid Publishing API
 
+The TurboSquid API documentation is available at https://docs.api.turbosquid.com
+
 # Installation
 You can download a compiled version of the ts-publishing-api-go app for your platform https://github.com/turbosquid/ts-publishing-api-go/releases. The application can be placed anywhere on your computer.
 
@@ -21,6 +23,8 @@ By default this will build the product draft and not attempt to publish it. If y
 ```bash
 ./ts-publishing-api-go -path product-folder -publish
 ```
+
+NOTE: Currently products published in this way will not be visible publicly because there are no categories assigned. The publishing API does not yet allow you to add or edit categories, but this addition is coming soon. This app will be updated when that ability is available. In the meantime, you can add Categories in the My Products section of squid.io.
 
 # TurboSquid Sample Product
 We have created a sample product that shows the formatting for product.json that the publishing api app expects. You can download and unzip this sample product into the same directory as the ts-publishing-api-go application.
