@@ -344,7 +344,7 @@ func (draft *Draft) publish(settings Settings) (error, int) {
 		log.Printf(bodyStr)
 	}
 
-	if err = jsonapi.UnmarshalPayload(resp.Body, product); err != nil {
+	if err = jsonapi.UnmarshalPayload(resp.Body, &product); err != nil {
 		return err, 0
 	}
 	return nil, product.Id
