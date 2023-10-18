@@ -2,13 +2,16 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
+	retry "github.com/avast/retry-go/v4"
 	"github.com/aws/aws-sdk-go/aws"
 	awscreds "github.com/aws/aws-sdk-go/aws/credentials"
 	awssession "github.com/aws/aws-sdk-go/aws/session"
@@ -37,44 +40,66 @@ type Upload struct {
 }
 
 func (credentials *Credentials) Upload(directory string, filePath string, settings Settings) (error, int) {
-	if err := credentials.checkExpired(settings); err != nil {
-		log.Fatalf("Failure getting credentials: %s", err)
-	}
-	log.Printf("Uploading file %s", filePath)
+	fileId, err := retry.DoWithData(
+		func() (int, error) {
+			if err := credentials.checkExpired(settings); err != nil {
+				log.Fatalf("Failure getting credentials: %s", err)
+			}
 
-	err, upload := credentials.UploadFile(fmt.Sprintf("%s/%s", directory, filePath))
+			err, upload := credentials.UploadFile(fmt.Sprintf("%s/%s", directory, filePath))
+			if err != nil {
+				log.Fatalf("Failure uploading file: %s", err)
+			}
+
+			if settings.Debug {
+				log.Printf("Processing file %s", filePath)
+			}
+			if err = processUpload(settings, &upload); err != nil {
+				log.Fatalf("Failure processing upload: %s", err)
+			}
+
+			if settings.Debug {
+				log.Printf("Polling process file %s: %s", filePath, upload.Id)
+			}
+			start := time.Now()
+			sleep := 1
+			for {
+				upload.Poll(settings)
+				t := time.Now()
+				if (upload.Status != "queued" && upload.Status != "processing") || int(t.Sub(start).Seconds()) > settings.UploadTimeout {
+					break
+				} else {
+					time.Sleep(time.Duration(sleep))
+					sleep = sleep + 1
+				}
+			}
+
+			if upload.Status != "success" {
+				return 0, errors.New(upload.Message)
+			}
+
+			log.Printf("Upload %s complete", upload.FileId)
+
+			return upload.FileId, err
+		},
+
+		retry.Attempts(3),
+
+		retry.RetryIf(func(err error) bool {
+			if strings.Contains(err.Error(), "virus check failure") {
+				log.Printf("Check failure for %s, retrying...", filePath)
+				return true
+			} else {
+				return false
+			}
+		}),
+	)
+
 	if err != nil {
-		log.Fatalf("Failure uploading file: %s", err)
+		log.Fatalf("Upload process failed for %s: %s", filePath, err)
 	}
 
-	if settings.Debug {
-		log.Printf("Processing file %s", filePath)
-	}
-	if err = processUpload(settings, &upload); err != nil {
-		log.Fatalf("Failure processing upload: %s", err)
-	}
-
-	if settings.Debug {
-		log.Printf("Polling process file %s: %s", filePath, upload.Id)
-	}
-	start := time.Now()
-	sleep := 1
-	for {
-		upload.Poll(settings)
-		t := time.Now()
-		if (upload.Status != "queued" && upload.Status != "processing") || int(t.Sub(start).Seconds()) > settings.UploadTimeout {
-			break
-		} else {
-			time.Sleep(time.Duration(sleep))
-			sleep = sleep + 1
-		}
-	}
-
-	if upload.Status != "success" {
-		log.Fatalf("Upload process failed for %s: %s", filePath, upload.Status)
-	}
-
-	return err, upload.FileId
+	return err, fileId
 }
 
 func (credentials *Credentials) UploadFile(source string) (error, Upload) {
